@@ -2,7 +2,6 @@
 
 'use strict'
 
-const bcrypt = require('bcrypt')
 const _ = require('lodash')
 
 const prefix = '/api/v1/users'
@@ -18,15 +17,35 @@ fastify.get(`${prefix}/me`, {
                         type: 'integer'
                     },
                     profile: {
-                        type: 'object'
+                        type: 'object',
+                        properties: {
+                            id: {
+                                type: 'integer'
+                            },
+                            name: {
+                                type: 'string'
+                            }
+                        }
                     }
                 }
             }
         }
-
     }
 }, async (req) => {
 
-    console.log(req.user)
+    const [user] = await fastify.knex.select('id', 'name').from('users').where({
+        id: req.user.id
+    })
 
+    if (_.isUndefined(user)) {
+        const err = new Error('Invalid user token')
+
+        err.statusCode = 400
+        throw err
+    }
+
+    return {
+        statusCode: 200,
+        profile: user
+    }
 })

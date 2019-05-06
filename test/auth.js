@@ -13,6 +13,9 @@ const buildFastify = require('../src/app')
 let fastify = null
 let url = null
 
+const USERNAME = 'test@test.com'
+const PASSWORD = 'password'
+
 tap.beforeEach(async (done) => {
     fastify = buildFastify()
 
@@ -34,8 +37,8 @@ tap.test('Auth create user', async t => {
     // Correct
 
     let res = await request.post(`${url}/users/create`).send({
-        user: 'test@test.com',
-        password: 'password'
+        user: USERNAME,
+        password: PASSWORD
     })
 
     t.is(res.status, 200)
@@ -48,7 +51,7 @@ tap.test('Auth create user', async t => {
     // No username
 
     res = await request.post(`${url}/users/create`).send({
-        password: 'password'
+        password: PASSWORD
     }).ok(() => true)
 
     t.is(res.status, 400)
@@ -60,7 +63,7 @@ tap.test('Auth create user', async t => {
     // No password
 
     res = await request.post(`${url}/users/create`).send({
-        user: 'test@test.com'
+        user: USERNAME
     }).ok(() => true)
 
     t.is(res.status, 400)
@@ -76,8 +79,8 @@ tap.test('Auth login', async t => {
     // Correct
 
     let res = await request.post(`${url}/users/create`).send({
-        user: 'test@test.com',
-        password: 'password'
+        user: USERNAME,
+        password: PASSWORD
     })
 
     t.is(res.status, 200)
@@ -89,8 +92,8 @@ tap.test('Auth login', async t => {
     // Login success
 
     res = await request.post(`${url}/users/login`).send({
-        user: 'test@test.com',
-        password: 'password'
+        user: USERNAME,
+        password: PASSWORD
     }).ok(() => true)
 
     t.is(res.status, 200)
@@ -104,7 +107,7 @@ tap.test('Auth login', async t => {
     // Login failed (invalid password)
 
     res = await request.post(`${url}/users/login`).send({
-        user: 'test@test.com',
+        user: USERNAME,
         password: 'password1'
     }).ok(() => true)
 
@@ -119,7 +122,7 @@ tap.test('Auth login', async t => {
 
     res = await request.post(`${url}/users/login`).send({
         user: 'test1@test.com',
-        password: 'password'
+        password: PASSWORD
     }).ok(() => true)
 
     t.is(res.status, 401)
@@ -132,7 +135,7 @@ tap.test('Auth login', async t => {
     // Login failed (incorrect params)
 
     res = await request.post(`${url}/users/login`).send({
-        password: 'password'
+        password: PASSWORD
     }).ok(() => true)
 
     t.is(res.status, 400)
@@ -141,4 +144,67 @@ tap.test('Auth login', async t => {
 
     t.ok(_.isPlainObject(res.body))
     t.is(res.body.statusCode, 400)
+})
+
+tap.test('Auth get info', async t => {
+
+    // Correct
+
+    let res = await request.post(`${url}/users/create`).send({
+        user: USERNAME,
+        password: PASSWORD
+    })
+
+    t.is(res.status, 200)
+
+    t.match(_.get(res.headers, 'content-type'), /application\/json/)
+
+    t.ok(_.isPlainObject(res.body));
+
+    // Login success
+
+    res = await request.post(`${url}/users/login`).send({
+        user: USERNAME,
+        password: PASSWORD
+    }).ok(() => true)
+
+    t.is(res.status, 200)
+
+    t.match(_.get(res.headers, 'content-type'), /application\/json/)
+
+    t.ok(_.isPlainObject(res.body))
+    t.ok(!_.isEmpty(res.body.token))
+    t.is(res.body.statusCode, 200)
+
+    const {token} = res.body;
+
+    // Get Info success
+
+    res = await request.get(`${url}/users/me`)
+        .set('Authorization', `Bearer ${token}`)
+        .ok(() => true)
+
+    t.is(res.status, 200)
+
+    t.match(_.get(res.headers, 'content-type'), /application\/json/)
+
+    t.ok(_.isPlainObject(res.body))
+    t.ok(_.isPlainObject(res.body.profile))
+    t.is(res.body.profile.name, USERNAME)
+    t.is(res.body.statusCode, 200)
+
+    // Get Info unsuccess
+
+    res = await request.get(`${url}/users/me`)
+        .set('Authorization', `Bearer ${token}AA`)
+        .ok(() => true)
+
+    t.is(res.status, 401)
+
+    t.match(_.get(res.headers, 'content-type'), /application\/json/)
+
+    t.ok(_.isPlainObject(res.body))
+    t.is(res.body.statusCode, 401)
+
+
 })
