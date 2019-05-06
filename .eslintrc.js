@@ -100,7 +100,7 @@ module.exports = {
             "always"
         ],
         "newline-before-return": "off",
-        "newline-per-chained-call": "error",
+        "newline-per-chained-call": "off",
         "no-alert": "error",
         "no-array-constructor": "error",
         "no-async-promise-executor": "error",

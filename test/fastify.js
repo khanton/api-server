@@ -2,27 +2,47 @@
 
 'use strict'
 
+require('dotenv-flow').config()
+
 const _ = require('lodash')
 const tap = require('tap')
 const request = require('superagent')
 const buildFastify = require('../src/app')
 
-tap.test('GET `/api/v1/hello` route', async t => {
-    const fastify = buildFastify()
+let fastify = null
+let url = null
 
-    t.tearDown(() => {
-        fastify.close()
+tap.beforeEach((done) => {
+    fastify = buildFastify()
+
+    fastify.listen().then(() => {
+        url = `http://${fastify.server.address().address}:${fastify.server.address().port}/api/v1`
+        done()
     })
+})
 
-    await fastify.listen()
+tap.afterEach((done) => {
+    if (fastify) {
+        fastify.close().then(() => done())
+    }
+})
 
-    const url = `http://${fastify.server.address().address}:${fastify.server.address().port}/api/v1`
+tap.test('GET `/api/v1/version` route', async t => {
 
-    const res = await request.get(`${url}/hello`)
+    const res = await request.get(`${url}/version`)
 
     t.is(res.status, 200)
     // eslint-disable-next-line require-unicode-regexp
     t.match(_.get(res.headers, 'content-type'), /application\/json/)
 
     t.ok(_.isPlainObject(res.body));
+})
+
+tap.test('GET `/api/v1/version-not-found` route', async t => {
+
+    try {
+        await request.get(`${url}/version-not-found`)
+    } catch (err) {
+        t.is(err.status, 404)
+    }
 })
