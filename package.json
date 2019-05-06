@@ -11,11 +11,15 @@
   "author": "Anton Kholodkov",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^3.0.6",
     "dotenv": "^8.0.0",
     "dotenv-flow": "^0.4.0",
     "fastify": "^2.3.0",
+    "fastify-jwt": "^0.10.0",
+    "fastify-knexjs": "^1.0.14",
     "fastify-loader": "^2.3.7",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "pg": "^7.10.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.0",
