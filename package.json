@@ -12,18 +12,18 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^3.0.6",
-    "dotenv": "^8.0.0",
     "dotenv-flow": "^0.4.0",
-    "fastify": "^2.3.0",
+    "fastify": "^2.6.0",
     "fastify-jwt": "^0.10.0",
     "fastify-knexjs": "^1.0.14",
     "fastify-loader": "^2.3.7",
     "lodash": "^4.17.11",
-    "pg": "^7.10.0"
+    "pg": "^7.11.0"
   },
   "devDependencies": {
-    "nodemon": "^1.19.0",
-    "superagent": "^5.0.5",
-    "tap": "^13.1.2"
+    "nodemon": "^1.19.1",
+    "standard": "^12.0.1",
+    "superagent": "^5.1.0",
+    "tap": "^13.1.11"
   }
 }
